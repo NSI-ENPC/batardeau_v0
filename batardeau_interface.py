@@ -27,7 +27,7 @@ sout_nu = button_number(id_='{}-sout-nu'.format(name_app),label_=r'Coefficient d
 sout_t = button_number(id_='{}-sout-t'.format(name_app),label_=r'Épaisseur $t$ (m)')
 
 post_defo = dropdown(id_='{}-post-defo'.format(name_app),options_=['Oui','Non'],label_='Afficher le maillage déformé :',value_='Oui')
-post_colorize = dropdown(id_='{}-post-colorize'.format(name_app),options_=['ux','uy','uz'],label_="Colorer par :",value_='ux')
+post_colorize = dropdown(id_='{}-post-colorize'.format(name_app),options_=['ux','uy','uz','|u|'],label_="Colorer par :",value_='|u|')
 
 # Tableaux
 
@@ -260,26 +260,47 @@ def calculate(n_click,zInf,zSup,lv,lh,E,nu,t,tabPt):
     prevent_initial_call=True
 )
 def returnGraph3D(calcb, defo, colori):
-    df = pd.read_csv('output_batardeau.csv')
-    
-    fact = 0
-    if defo=='Oui':
-        max_coord = np.max(np.abs(df[['x','y']]))
-        max_displ = np.max(np.abs(df[['ux','uy','uz']]))
-        fact = 0.2*max_coord/max_displ
-    
+
     fig = go.Figure()
-    fig.add_trace(go.Scatter3d(x=[x+fact*ux for x,ux in zip(df['x'].tolist(),df['ux'].tolist())],
-                               y=[y+fact*uy for y,uy in zip(df['y'].tolist(),df['uy'].tolist())],
-                               z=[z+fact*uz for z,uz in zip(df['z'].tolist(),df['uz'].tolist())],
-                               mode='markers',
-                               marker=dict(
-                                            #size=3,
-                                            color=df[colori],                # set color to an array/list of desired values
-                                            colorscale='plasma',   # choose a colorscale
-                                            opacity=0.9,
-                                            colorbar=dict(title=colori+' (m)')
-                                        )))
+
+    if colori in ['ux','uy','uz','|u|']:
+
+        df = pd.read_csv('output_batardeau.csv')
+    
+        fact = 0
+        if defo=='Oui':
+            max_coord = np.max(np.abs(df[['x','y']]))
+            max_displ = np.max(np.abs(df[['ux','uy','uz']]))
+            fact = 0.2*max_coord/max_displ
+        
+        if (colori=='|u|'):
+            df['|u|'] = [(ux**2+uy**2+uz**2)**0.5 for ux,uy,uz in zip(df['ux'].tolist(),df['uy'].tolist(),df['uz'].tolist())]
+        
+        fig.add_trace(go.Scatter3d(x=[x+fact*ux for x,ux in zip(df['x'].tolist(),df['ux'].tolist())],
+                                y=[y+fact*uy for y,uy in zip(df['y'].tolist(),df['uy'].tolist())],
+                                z=[z+fact*uz for z,uz in zip(df['z'].tolist(),df['uz'].tolist())],
+                                mode='markers',
+                                marker=dict(
+                                                #size=3,
+                                                color=df[colori],                # set color to an array/list of desired values
+                                                colorscale='plasma',   # choose a colorscale
+                                                opacity=0.9,
+                                                colorbar=dict(title=colori+' (m)')
+                                            )))
+    else:
+        df = pd.read_csv('output_batardeau_eff.csv')
+
+        fig.add_trace(go.Scatter3d(x=df['x'].tolist(),
+                                y=df['y'].tolist(),
+                                z=df['z'].tolist(),
+                                mode='markers',
+                                marker=dict(
+                                                #size=3,
+                                                color=[m/1000 for m in df[colori].tolist()],                # set color to an array/list of desired values
+                                                colorscale='plasma',   # choose a colorscale
+                                                opacity=0.9,
+                                                colorbar=dict(title=colori+' (kNm)')
+                                            )))
     fig['layout']['scene']=dict(camera=dict(eye=dict(x=1.15, y=1.15, z=0.8)), #the default values are 1.25, 1.25, 1.25
                                 xaxis=dict(),
                                 yaxis=dict(),
