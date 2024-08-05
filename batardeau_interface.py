@@ -14,6 +14,8 @@ app = Dash(__name__, external_stylesheets=[dbc.themes.JOURNAL])
 
 titre_="Batardeau (v0.2)"
 
+app.title=titre_
+
 # Buttons & co.
 
 sout_z_sup = button_number(id_='{}-sout-z-sup'.format(name_app),label_='Cote supérieure (mNGF)')
