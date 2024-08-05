@@ -25,7 +25,7 @@
 // +++++++++
 //      v0.1 - Première implémentation du code pour coque seule, retranscription du code Python.
 //      v0.2 - Amélioration de l'étape d'assemblage, en internalisant la multiplication de rotation.
-//             On passe de 25% à 6-7% en part de temps pour l'assemblage.
+//             On passe de 25% à 6-7% en part de temps pour l'assemblage. 
 
 
 
