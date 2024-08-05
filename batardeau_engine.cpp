@@ -327,6 +327,22 @@ carac_mail mailleur(double lh, double lv, double H, vector<point> &lst, vector<f
     return carac_mail(Nv, SNi);
 };
 
+VectorXd renvoie_mX2(double x, double y, double a, double b, double nu){
+    VectorXd mX2(12);
+    mX2 << 6*(-(a*a*a)*b + 2*(a*a*a)*y + (a*a)*b*x - 2*(a*a)*x*y - (b*b)*nu*(a*b - a*y - 2*b*x + 2*x*y))/((a*a*a)*(b*b*b)), 2*(-2*a*b + 3*a*y + 2*b*x - 3*x*y)/(a*(b*b)), 2*nu*(2*a*b - 2*a*y - 3*b*x + 3*x*y)/((a*a)*b), 6*(-(a*a)*b*x + 2*(a*a)*x*y + (b*b)*nu*(a*b - a*y - 2*b*x + 2*x*y))/((a*a*a)*(b*b*b)), 2*x*(-2*b + 3*y)/(a*(b*b)), 2*nu*(a*b - a*y - 3*b*x + 3*x*y)/((a*a)*b), 6*((a*a)*b*x - 2*(a*a)*x*y + (b*b)*nu*y*(a - 2*x))/((a*a*a)*(b*b*b)), 2*x*(-b + 3*y)/(a*(b*b)), 2*nu*y*(a - 3*x)/((a*a)*b), 6*((a*a*a)*b - 2*(a*a*a)*y - (a*a)*b*x + 2*(a*a)*x*y - (b*b)*nu*y*(a - 2*x))/((a*a*a)*(b*b*b)), 2*(-a*b + 3*a*y + b*x - 3*x*y)/(a*(b*b)), 2*nu*y*(2*a - 3*x)/((a*a)*b);
+    return mX2;
+};
+VectorXd renvoie_mY2(double x, double y, double a, double b, double nu){
+    VectorXd mY2(12);
+    mY2 << 6*(-(a*a)*nu*(a*b - 2*a*y - b*x + 2*x*y) - a*(b*b*b) + a*(b*b)*y + 2*(b*b*b)*x - 2*(b*b)*x*y)/((a*a*a)*(b*b*b)), 2*nu*(-2*a*b + 3*a*y + 2*b*x - 3*x*y)/(a*(b*b)), 2*(2*a*b - 2*a*y - 3*b*x + 3*x*y)/((a*a)*b), 6*(-(a*a)*nu*x*(b - 2*y) + a*(b*b*b) - a*(b*b)*y - 2*(b*b*b)*x + 2*(b*b)*x*y)/((a*a*a)*(b*b*b)), 2*nu*x*(-2*b + 3*y)/(a*(b*b)), 2*(a*b - a*y - 3*b*x + 3*x*y)/((a*a)*b), 6*((a*a)*nu*x*(b - 2*y) + a*(b*b)*y - 2*(b*b)*x*y)/((a*a*a)*(b*b*b)), 2*nu*x*(-b + 3*y)/(a*(b*b)), 2*y*(a - 3*x)/((a*a)*b), 6*((a*a)*nu*(a*b - 2*a*y - b*x + 2*x*y) - a*(b*b)*y + 2*(b*b)*x*y)/((a*a*a)*(b*b*b)), 2*nu*(-a*b + 3*a*y + b*x - 3*x*y)/(a*(b*b)), 2*y*(2*a - 3*x)/((a*a)*b);
+    return mY2;
+};
+VectorXd renvoie_mXY(double x, double y, double a, double b, double nu){
+    VectorXd mXY(12);
+    mXY << -1/(a*b) + 6*y/(a*(b*b)) - 6*(y*y)/(a*(b*b*b)) + 6*x/((a*a)*b) - 6*(x*x)/((a*a*a)*b), (-(b*b) + 4*b*y - 3*(y*y))/(a*(b*b)), ((a*a) - 4*a*x + 3*(x*x))/((a*a)*b), 1/(a*b) - 6*y/(a*(b*b)) + 6*(y*y)/(a*(b*b*b)) - 6*x/((a*a)*b) + 6*(x*x)/((a*a*a)*b), ((b*b) - 4*b*y + 3*(y*y))/(a*(b*b)), x*(-2*a + 3*x)/((a*a)*b), -1/(a*b) + 6*y/(a*(b*b)) - 6*(y*y)/(a*(b*b*b)) + 6*x/((a*a)*b) - 6*(x*x)/((a*a*a)*b), y*(-2*b + 3*y)/(a*(b*b)), x*(2*a - 3*x)/((a*a)*b), 1/(a*b) - 6*y/(a*(b*b)) + 6*(y*y)/(a*(b*b*b)) - 6*x/((a*a)*b) + 6*(x*x)/((a*a*a)*b), y*(2*b - 3*y)/(a*(b*b)), (-(a*a) + 4*a*x - 3*(x*x))/((a*a)*b);
+    return mXY;
+};
+
 // V - Création de la fonction de traitement total
 // -----------------------------------------------
 
@@ -386,6 +402,42 @@ void batardeau(double lh, double lv, double H, vector<point> lst_coins, int nb_c
     };
 
     MyFile.close();
+
+    ofstream MyFile2("output_batardeau_eff.csv");
+
+    MyFile2 << "x,y,z,mhh,mvv,mhv" <<endl;
+
+    double D=E*t*t*t/(12.0*(1-nu*nu));
+
+    for (int k=0; k<nb_elmt; k++){
+        face element = elements[k];
+
+        double a = element.a;
+        double b = element.b;
+        VectorXd q_global(24);
+        q_global << q_sol(seq(6*element.pt1.no,6*element.pt1.no+5)),q_sol(seq(6*element.pt2.no,6*element.pt2.no+5)),
+                    q_sol(seq(6*element.pt3.no,6*element.pt3.no+5)),q_sol(seq(6*element.pt4.no,6*element.pt4.no+5));
+        m3_1 = element.local2global();
+        m24_1 <<m3_1, z3, z3, z3, z3, z3, z3, z3,
+                z3, m3_1, z3, z3, z3, z3, z3, z3,
+                z3, z3, m3_1, z3, z3, z3, z3, z3,
+                z3, z3, z3, m3_1, z3, z3, z3, z3,
+                z3, z3, z3, z3, m3_1, z3, z3, z3,
+                z3, z3, z3, z3, z3, m3_1, z3, z3,
+                z3, z3, z3, z3, z3, z3, m3_1, z3,
+                z3, z3, z3, z3, z3, z3, z3, m3_1;
+        
+        VectorXd q_local_full(24);
+        q_local_full = m24_1.transpose()*q_global;
+        VectorXd q_local(12);
+        q_local << q_local_full(seq(2,4)),q_local_full(seq(8,10)),q_local_full(seq(14,16)),q_local_full(seq(20,22));
+
+        MyFile2 << element.ptC.x << "," << element.ptC.y << "," << element.ptC.z << "," << D*(renvoie_mX2(a/2.,b/2.,a,b,nu).transpose()*q_local) << "," << D*(renvoie_mY2(a/2.,b/2.,a,b,nu).transpose()*q_local) << "," << D*(1-nu)*(renvoie_mXY(a/2.,b/2.,a,b,nu).transpose()*q_local) << endl;
+        
+
+    };
+
+    MyFile2.close();
 };
 
 // VI - Fonction main, script du programme

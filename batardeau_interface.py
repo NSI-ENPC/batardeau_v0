@@ -12,7 +12,7 @@ name_app = 'batardeau'
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.JOURNAL])
 
-titre_="Batardeau (v0.2)"
+titre_="Batardeau (v0.3)"
 
 app.title=titre_
 
@@ -27,7 +27,7 @@ sout_nu = button_number(id_='{}-sout-nu'.format(name_app),label_=r'Coefficient d
 sout_t = button_number(id_='{}-sout-t'.format(name_app),label_=r'Épaisseur $t$ (m)')
 
 post_defo = dropdown(id_='{}-post-defo'.format(name_app),options_=['Oui','Non'],label_='Afficher le maillage déformé :',value_='Oui')
-post_colorize = dropdown(id_='{}-post-colorize'.format(name_app),options_=['ux','uy','uz','|u|'],label_="Colorer par :",value_='|u|')
+post_colorize = dropdown(id_='{}-post-colorize'.format(name_app),options_=['ux','uy','uz','|u|','mhh','mvv','mhv'],label_="Colorer par :",value_='|u|')
 
 # Tableaux
 
