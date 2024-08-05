@@ -1,0 +1,28 @@
+/* restyle radio items */
+.radio-group .form-check {
+    padding-left: 0;
+  }
+  
+  .radio-group .btn-group > .form-check:not(:last-child) > .btn {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  
+  .radio-group .btn-group > .form-check:not(:first-child) > .btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    margin-left: -1px;
+  }
+
+  /* fixes  when the table dropdown doesn't drop down */
+.Select-menu-outer {
+  display: block !important;
+}
+
+.Select-menu-outer {
+  display: block !important;
+}
+
+.dash-table-container .dropdown {
+  position: static;
+}
