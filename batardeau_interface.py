@@ -28,6 +28,7 @@ sout_t = button_number(id_='{}-sout-t'.format(name_app),label_=r'Épaisseur $t$ 
 
 post_defo = dropdown(id_='{}-post-defo'.format(name_app),options_=['Oui','Non'],label_='Afficher le maillage déformé :',value_='Oui')
 post_colorize = dropdown(id_='{}-post-colorize'.format(name_app),options_=['ux','uy','uz','|u|','mhh','mvv','mhv'],label_="Colorer par :",value_='|u|')
+scaleF = button_number(id_='{}-scaleFactor'.format(name_app),label_='Scale factor for deformation',value_=1)
 
 # Tableaux
 
@@ -91,7 +92,7 @@ onglet_sol = html.Div([
 onglet_eau = html.Div([
     dcc.Markdown('Cette section sera complétée lorsque le code permettra de prendre en compte les fonctionnalités associées.')
 ],id='{}-div-eau'.format(name_app))
-onglet_postproc = html.Div([dbc.Row([post_defo,post_colorize])],id='{}-div-postproc'.format(name_app))
+onglet_postproc = html.Div([dbc.Row([post_defo,post_colorize,scaleF])],id='{}-div-postproc'.format(name_app))
 
 model_3D = create_graph(id_='{}-model3D'.format(name_app))
 graph_3D = create_graph(id_='{}-graph3D'.format(name_app))
@@ -219,7 +220,7 @@ def aff_struct(zSup,zInf,tabPt):
 )
 def calculate(n_click,zInf,zSup,lv,lh,E,nu,t,tabPt):
     E = E*1e6
-    H = zSup-zInf
+    #H = zSup-zInf
     lst_coins = [(tabPt[k]['x'],tabPt[k]['y']) for k in range(len(tabPt))]
     recalculate = True
 
@@ -230,7 +231,8 @@ def calculate(n_click,zInf,zSup,lv,lh,E,nu,t,tabPt):
 
     fileIn.write(str(lh)+"\n")
     fileIn.write(str(lv)+"\n")
-    fileIn.write(str(H)+"\n")
+    fileIn.write(str(zInf)+"\n")
+    fileIn.write(str(zSup)+"\n")
     fileIn.write(str(E)+"\n")
     fileIn.write(str(nu)+"\n")
     fileIn.write(str(t)+"\n")
@@ -257,21 +259,23 @@ def calculate(n_click,zInf,zSup,lv,lh,E,nu,t,tabPt):
     Input('{}-calcul-button'.format(name_app), 'children'),
     Input('{}-post-defo'.format(name_app),'value'),
     Input('{}-post-colorize'.format(name_app),'value'),
+    Input('{}-scaleFactor'.format(name_app),'value'),
     prevent_initial_call=True
 )
-def returnGraph3D(calcb, defo, colori):
+def returnGraph3D(calcb, defo, colori, fact):
 
     fig = go.Figure()
 
     if colori in ['ux','uy','uz','|u|']:
 
         df = pd.read_csv('output_batardeau.csv')
-    
-        fact = 0
-        if defo=='Oui':
-            max_coord = np.max(np.abs(df[['x','y']]))
-            max_displ = np.max(np.abs(df[['ux','uy','uz']]))
-            fact = 0.2*max_coord/max_displ
+
+        if defo=='Non':
+            fact = 0
+        #if defo=='Oui':
+        #    max_coord = np.max(np.abs(df[['x','y']]))
+        #    max_displ = np.max(np.abs(df[['ux','uy','uz']]))
+        #    fact = 0.2*max_coord/max_displ
         
         if (colori=='|u|'):
             df['|u|'] = [(ux**2+uy**2+uz**2)**0.5 for ux,uy,uz in zip(df['ux'].tolist(),df['uy'].tolist(),df['uz'].tolist())]
@@ -299,7 +303,7 @@ def returnGraph3D(calcb, defo, colori):
                                                 color=[m/1000 for m in df[colori].tolist()],                # set color to an array/list of desired values
                                                 colorscale='plasma',   # choose a colorscale
                                                 opacity=0.9,
-                                                colorbar=dict(title=colori+' (kNm)')
+                                                colorbar=dict(title=colori+' (kNm/m)')
                                             )))
     fig['layout']['scene']=dict(camera=dict(eye=dict(x=1.15, y=1.15, z=0.8)), #the default values are 1.25, 1.25, 1.25
                                 xaxis=dict(),

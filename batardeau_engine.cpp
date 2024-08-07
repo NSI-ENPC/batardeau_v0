@@ -285,9 +285,10 @@ class carac_mail{
     };
 };
 
-carac_mail mailleur(double lh, double lv, double H, vector<point> &lst, vector<face> &lst_f, vector<point> lst_coins, int nb_coins){
+carac_mail mailleur(double lh, double lv, double zInf, double zSup, vector<point> &lst, vector<face> &lst_f, vector<point> lst_coins, int nb_coins){
     int compteur = 0;
     int SNi=0;
+    double H = zSup-zInf;
     int Nv = H/lv+1;
 
     for (int i=0; i<nb_coins;i++){
@@ -346,13 +347,13 @@ VectorXd renvoie_mXY(double x, double y, double a, double b, double nu){
 // V - Création de la fonction de traitement total
 // -----------------------------------------------
 
-void batardeau(double lh, double lv, double H, vector<point> lst_coins, int nb_coins, double E, double nu, double t){
+void batardeau(double lh, double lv, double zInf, double zSup, vector<point> lst_coins, int nb_coins, double E, double nu, double t){
     vector<T> triplet_K;
     vector<T> triplet_F;
     vector<point> vertices;
     vector<face> elements; 
 
-    carac_mail kar = mailleur(lh, lv, H, vertices, elements, lst_coins, nb_coins);
+    carac_mail kar = mailleur(lh, lv, zInf, zSup, vertices, elements, lst_coins, nb_coins);
     int Nv=kar.Nv; int SNi=kar.SNi;
     int nb_total = SNi*(Nv+1);
     int nb_elmt = SNi*Nv;
@@ -365,7 +366,7 @@ void batardeau(double lh, double lv, double H, vector<point> lst_coins, int nb_c
 
     for (int k=0; k<nb_elmt; k++){
         global_stiffness_elem(triplet_K,elements[k],E,nu,t);
-        global_load_elem(triplet_F,elements[k],10e3*(H-elements[k].pt1.z));
+        global_load_elem(triplet_F,elements[k],10e3*(zSup-0.5*(elements[k].pt1.z+elements[k].pt4.z)));
     };
 
     auto stop = high_resolution_clock::now();
@@ -446,26 +447,26 @@ void batardeau(double lh, double lv, double H, vector<point> lst_coins, int nb_c
 int main() {
 
     auto start2 = high_resolution_clock::now();
-    double lh, lv, H, E, nu, t;
+    double lh, lv, zInf, zSup, E, nu, t;
     int nb_coins;
     string extract;
     vector<point> lst_coins;
 
     ifstream rFile("input_batardeau.txt");
     
-    rFile >> lh >> lv >> H >> E >> nu >> t >> nb_coins;
+    rFile >> lh >> lv >> zInf >> zSup >> E >> nu >> t >> nb_coins;
     
     for (int k=0; k<nb_coins; k++){
         double x0,y0;
         rFile >> x0 >> y0;
-        lst_coins.push_back(point(x0,y0,0));
+        lst_coins.push_back(point(x0,y0,zInf));
     };
     lst_coins.push_back(lst_coins[0]);
 
 
     rFile.close();
 
-    batardeau(lh,lv,H,lst_coins,nb_coins, E, nu, t);
+    batardeau(lh,lv,zInf,zSup,lst_coins,nb_coins, E, nu, t);
 
     cout << "Durée création K [s] : " << tpsRemplissage_K/1000000.0 << endl;
     cout << "Durée création R [s] : " << tpsR3/1000000.0 << endl;
