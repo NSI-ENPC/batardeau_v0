@@ -290,7 +290,9 @@ def returnGraph3D(calcb, defo, colori, fact):
                                                 colorscale='plasma',   # choose a colorscale
                                                 opacity=0.9,
                                                 colorbar=dict(title=colori+' (m)')
-                                            )))
+                                ),
+                                customdata=df[colori],
+                                hovertemplate="x: %{x:.3f}m"+"<br>"+"y: %{y:.3f}m"+"<br>"+"z: %{z:.3f}mNGF"+"<br>"+colori+": %{customdata:,.3f}m"))
     else:
         df = pd.read_csv('output_batardeau_eff.csv')
 
@@ -304,7 +306,9 @@ def returnGraph3D(calcb, defo, colori, fact):
                                                 colorscale='plasma',   # choose a colorscale
                                                 opacity=0.9,
                                                 colorbar=dict(title=colori+' (kNm/m)')
-                                            )))
+                                            ),
+                                customdata=df[colori],
+                                hovertemplate="x: %{x:.3f}m"+"<br>"+"y: %{y:.3f}m"+"<br>"+"z: %{z:.3f}mNGF"+"<br>"+colori+": %{customdata:,.0f}Nm/m"))
     fig['layout']['scene']=dict(camera=dict(eye=dict(x=1.15, y=1.15, z=0.8)), #the default values are 1.25, 1.25, 1.25
                                 xaxis=dict(),
                                 yaxis=dict(),
