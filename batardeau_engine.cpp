@@ -121,8 +121,7 @@ class face{
         b = (p1.vectorTo(p4)).norm();
         
     };
-    // Cette fonction prend en entrée les points 1, 2 et 4 d'un élément
-    // Elle renvoie alors la matrice de passage de la base locale dans la base globale
+    // Cette méthode renvoie la matrice de passage de la base locale dans la base globale
     Matrix3d local2global(){
         vecteur ex = (pt1.vectorTo(pt2)).normalize();
         vecteur ey = (pt1.vectorTo(pt4)).normalize();
@@ -145,11 +144,7 @@ MatrixXd m24_0(24,24);
 MatrixXd m24_1(24,24);
 MatrixXd m24_2(24,24);
 
-double tpsMultiplication=0.;
-double tpsRemplissage_K=0.;
-double tpsR3 = 0.;
-
-// Cette fonction prend en entrée les quatre points de l'élément pt1 à pt4, le module d'Young E, le coefficient de Poisson nu et l'épaisseur t
+// Cette fonction prend en entrée un élément, le module d'Young E, le coefficient de Poisson nu et l'épaisseur t
 // Elle ajoute les triplets de la matrice de raideur élémentaire dans la base globale dans la liste totale des triplets.
 void global_stiffness_elem(vector<T> &lst, face element, double E, double nu, double t){
     double B = E*t/(1-nu*nu);
@@ -158,16 +153,12 @@ void global_stiffness_elem(vector<T> &lst, face element, double E, double nu, do
     double b = element.b;
     int ktz1=element.pt1.ktz;int ktz2=element.pt2.ktz;int ktz3=element.pt3.ktz;int ktz4=element.pt4.ktz;
 
-    auto start_m3 = high_resolution_clock::now();
     m3_1 = element.local2global();
     double r11=m3_1(0,0);double r12=m3_1(0,1);double r13=m3_1(0,2);
     double r21=m3_1(1,0);double r22=m3_1(1,1);double r23=m3_1(1,2);
     double r31=m3_1(2,0);double r32=m3_1(2,1);double r33=m3_1(2,2);
-    auto stop_m3 = high_resolution_clock::now();
-    auto duration_m3 = duration_cast<microseconds>(stop_m3 - start_m3);
-    tpsR3 += duration_m3.count();
 
-    auto start_mat = high_resolution_clock::now();
+
     m24_2 <<D*(r13*r13)*(4*a/(b*b*b)-4*nu/(5*a*b)+14/(5*a*b)+4*b/(a*a*a))+r11*(B*r12*(nu/8+1/8)+B*r11*((a*a)*(1-nu)+2*(b*b))/(6*a*b))+r12*(B*r11*(nu/8+1/8)+B*r12*(2*(a*a)+(b*b)*(1-nu))/(6*a*b)),D*r13*r23*(4*a/(b*b*b)-4*nu/(5*a*b)+14/(5*a*b)+4*b/(a*a*a))+r11*(B*r22*(nu/8+1/8)+B*r21*((a*a)*(1-nu)+2*(b*b))/(6*a*b))+r12*(B*r21*(nu/8+1/8)+B*r22*(2*(a*a)+(b*b)*(1-nu))/(6*a*b)),D*r13*r33*(4*a/(b*b*b)-4*nu/(5*a*b)+14/(5*a*b)+4*b/(a*a*a))+r11*(B*r32*(nu/8+1/8)+B*r31*((a*a)*(1-nu)+2*(b*b))/(6*a*b))+r12*(B*r31*(nu/8+1/8)+B*r32*(2*(a*a)+(b*b)*(1-nu))/(6*a*b)),r13*(D*r11*(2*a/(b*b)+4*nu/(5*a)+1/(5*a))+D*r12*(-4*nu/(5*b)-1/(5*b)-2*b/(a*a))),r13*(D*r21*(2*a/(b*b)+4*nu/(5*a)+1/(5*a))+D*r22*(-4*nu/(5*b)-1/(5*b)-2*b/(a*a))),r13*(D*r31*(2*a/(b*b)+4*nu/(5*a)+1/(5*a))+D*r32*(-4*nu/(5*b)-1/(5*b)-2*b/(a*a))),D*(r13*r13)*(2*a/(b*b*b)+4*nu/(5*a*b)-14/(5*a*b)-4*b/(a*a*a))+r11*(B*r12*(3*nu/8-1/8)+B*r11*((a*a)*(1-nu)-4*(b*b))/(12*a*b))+r12*(B*r11*(1/8-3*nu/8)+B*r12*((a*a)+(b*b)*(nu-1))/(6*a*b)),D*r13*r23*(2*a/(b*b*b)+4*nu/(5*a*b)-14/(5*a*b)-4*b/(a*a*a))+r11*(B*r22*(3*nu/8-1/8)+B*r21*((a*a)*(1-nu)-4*(b*b))/(12*a*b))+r12*(B*r21*(1/8-3*nu/8)+B*r22*((a*a)+(b*b)*(nu-1))/(6*a*b)),D*r13*r33*(2*a/(b*b*b)+4*nu/(5*a*b)-14/(5*a*b)-4*b/(a*a*a))+r11*(B*r32*(3*nu/8-1/8)+B*r31*((a*a)*(1-nu)-4*(b*b))/(12*a*b))+r12*(B*r31*(1/8-3*nu/8)+B*r32*((a*a)+(b*b)*(nu-1))/(6*a*b)),r13*(D*r11*(a/(b*b)-4*nu/(5*a)-1/(5*a))+D*r12*(nu/(5*b)-1/(5*b)-2*b/(a*a))),r13*(D*r21*(a/(b*b)-4*nu/(5*a)-1/(5*a))+D*r22*(nu/(5*b)-1/(5*b)-2*b/(a*a))),r13*(D*r31*(a/(b*b)-4*nu/(5*a)-1/(5*a))+D*r32*(nu/(5*b)-1/(5*b)-2*b/(a*a))),D*(r13*r13)*(-2*a/(b*b*b)-4*nu/(5*a*b)+14/(5*a*b)-2*b/(a*a*a))+r11*(B*r12*(-nu/8-1/8)+B*r11*((a*a)*(nu-1)-2*(b*b))/(12*a*b))+r12*(B*r11*(-nu/8-1/8)+B*r12*(-2*(a*a)+(b*b)*(nu-1))/(12*a*b)),D*r13*r23*(-2*a/(b*b*b)-4*nu/(5*a*b)+14/(5*a*b)-2*b/(a*a*a))+r11*(B*r22*(-nu/8-1/8)+B*r21*((a*a)*(nu-1)-2*(b*b))/(12*a*b))+r12*(B*r21*(-nu/8-1/8)+B*r22*(-2*(a*a)+(b*b)*(nu-1))/(12*a*b)),D*r13*r33*(-2*a/(b*b*b)-4*nu/(5*a*b)+14/(5*a*b)-2*b/(a*a*a))+r11*(B*r32*(-nu/8-1/8)+B*r31*((a*a)*(nu-1)-2*(b*b))/(12*a*b))+r12*(B*r31*(-nu/8-1/8)+B*r32*(-2*(a*a)+(b*b)*(nu-1))/(12*a*b)),r13*(D*r11*(a/(b*b)+nu/(5*a)-1/(5*a))+D*r12*(-nu/(5*b)+1/(5*b)-b/(a*a))),r13*(D*r21*(a/(b*b)+nu/(5*a)-1/(5*a))+D*r22*(-nu/(5*b)+1/(5*b)-b/(a*a))),r13*(D*r31*(a/(b*b)+nu/(5*a)-1/(5*a))+D*r32*(-nu/(5*b)+1/(5*b)-b/(a*a))),D*(r13*r13)*(-4*a/(b*b*b)+4*nu/(5*a*b)-14/(5*a*b)+2*b/(a*a*a))+r11*(B*r12*(1/8-3*nu/8)+B*r11*((a*a)*(nu-1)+(b*b))/(6*a*b))+r12*(B*r11*(3*nu/8-1/8)+B*r12*(-4*(a*a)+(b*b)*(1-nu))/(12*a*b)),D*r13*r23*(-4*a/(b*b*b)+4*nu/(5*a*b)-14/(5*a*b)+2*b/(a*a*a))+r11*(B*r22*(1/8-3*nu/8)+B*r21*((a*a)*(nu-1)+(b*b))/(6*a*b))+r12*(B*r21*(3*nu/8-1/8)+B*r22*(-4*(a*a)+(b*b)*(1-nu))/(12*a*b)),D*r13*r33*(-4*a/(b*b*b)+4*nu/(5*a*b)-14/(5*a*b)+2*b/(a*a*a))+r11*(B*r32*(1/8-3*nu/8)+B*r31*((a*a)*(nu-1)+(b*b))/(6*a*b))+r12*(B*r31*(3*nu/8-1/8)+B*r32*(-4*(a*a)+(b*b)*(1-nu))/(12*a*b)),r13*(D*r11*(2*a/(b*b)-nu/(5*a)+1/(5*a))+D*r12*(4*nu/(5*b)+1/(5*b)-b/(a*a))),r13*(D*r21*(2*a/(b*b)-nu/(5*a)+1/(5*a))+D*r22*(4*nu/(5*b)+1/(5*b)-b/(a*a))),r13*(D*r31*(2*a/(b*b)-nu/(5*a)+1/(5*a))+D*r32*(4*nu/(5*b)+1/(5*b)-b/(a*a))),
             D*r13*r23*(4*a/(b*b*b)-4*nu/(5*a*b)+14/(5*a*b)+4*b/(a*a*a))+r21*(B*r12*(nu/8+1/8)+B*r11*((a*a)*(1-nu)+2*(b*b))/(6*a*b))+r22*(B*r11*(nu/8+1/8)+B*r12*(2*(a*a)+(b*b)*(1-nu))/(6*a*b)),D*(r23*r23)*(4*a/(b*b*b)-4*nu/(5*a*b)+14/(5*a*b)+4*b/(a*a*a))+r21*(B*r22*(nu/8+1/8)+B*r21*((a*a)*(1-nu)+2*(b*b))/(6*a*b))+r22*(B*r21*(nu/8+1/8)+B*r22*(2*(a*a)+(b*b)*(1-nu))/(6*a*b)),D*r23*r33*(4*a/(b*b*b)-4*nu/(5*a*b)+14/(5*a*b)+4*b/(a*a*a))+r21*(B*r32*(nu/8+1/8)+B*r31*((a*a)*(1-nu)+2*(b*b))/(6*a*b))+r22*(B*r31*(nu/8+1/8)+B*r32*(2*(a*a)+(b*b)*(1-nu))/(6*a*b)),r23*(D*r11*(2*a/(b*b)+4*nu/(5*a)+1/(5*a))+D*r12*(-4*nu/(5*b)-1/(5*b)-2*b/(a*a))),r23*(D*r21*(2*a/(b*b)+4*nu/(5*a)+1/(5*a))+D*r22*(-4*nu/(5*b)-1/(5*b)-2*b/(a*a))),r23*(D*r31*(2*a/(b*b)+4*nu/(5*a)+1/(5*a))+D*r32*(-4*nu/(5*b)-1/(5*b)-2*b/(a*a))),D*r13*r23*(2*a/(b*b*b)+4*nu/(5*a*b)-14/(5*a*b)-4*b/(a*a*a))+r21*(B*r12*(3*nu/8-1/8)+B*r11*((a*a)*(1-nu)-4*(b*b))/(12*a*b))+r22*(B*r11*(1/8-3*nu/8)+B*r12*((a*a)+(b*b)*(nu-1))/(6*a*b)),D*(r23*r23)*(2*a/(b*b*b)+4*nu/(5*a*b)-14/(5*a*b)-4*b/(a*a*a))+r21*(B*r22*(3*nu/8-1/8)+B*r21*((a*a)*(1-nu)-4*(b*b))/(12*a*b))+r22*(B*r21*(1/8-3*nu/8)+B*r22*((a*a)+(b*b)*(nu-1))/(6*a*b)),D*r23*r33*(2*a/(b*b*b)+4*nu/(5*a*b)-14/(5*a*b)-4*b/(a*a*a))+r21*(B*r32*(3*nu/8-1/8)+B*r31*((a*a)*(1-nu)-4*(b*b))/(12*a*b))+r22*(B*r31*(1/8-3*nu/8)+B*r32*((a*a)+(b*b)*(nu-1))/(6*a*b)),r23*(D*r11*(a/(b*b)-4*nu/(5*a)-1/(5*a))+D*r12*(nu/(5*b)-1/(5*b)-2*b/(a*a))),r23*(D*r21*(a/(b*b)-4*nu/(5*a)-1/(5*a))+D*r22*(nu/(5*b)-1/(5*b)-2*b/(a*a))),r23*(D*r31*(a/(b*b)-4*nu/(5*a)-1/(5*a))+D*r32*(nu/(5*b)-1/(5*b)-2*b/(a*a))),D*r13*r23*(-2*a/(b*b*b)-4*nu/(5*a*b)+14/(5*a*b)-2*b/(a*a*a))+r21*(B*r12*(-nu/8-1/8)+B*r11*((a*a)*(nu-1)-2*(b*b))/(12*a*b))+r22*(B*r11*(-nu/8-1/8)+B*r12*(-2*(a*a)+(b*b)*(nu-1))/(12*a*b)),D*(r23*r23)*(-2*a/(b*b*b)-4*nu/(5*a*b)+14/(5*a*b)-2*b/(a*a*a))+r21*(B*r22*(-nu/8-1/8)+B*r21*((a*a)*(nu-1)-2*(b*b))/(12*a*b))+r22*(B*r21*(-nu/8-1/8)+B*r22*(-2*(a*a)+(b*b)*(nu-1))/(12*a*b)),D*r23*r33*(-2*a/(b*b*b)-4*nu/(5*a*b)+14/(5*a*b)-2*b/(a*a*a))+r21*(B*r32*(-nu/8-1/8)+B*r31*((a*a)*(nu-1)-2*(b*b))/(12*a*b))+r22*(B*r31*(-nu/8-1/8)+B*r32*(-2*(a*a)+(b*b)*(nu-1))/(12*a*b)),r23*(D*r11*(a/(b*b)+nu/(5*a)-1/(5*a))+D*r12*(-nu/(5*b)+1/(5*b)-b/(a*a))),r23*(D*r21*(a/(b*b)+nu/(5*a)-1/(5*a))+D*r22*(-nu/(5*b)+1/(5*b)-b/(a*a))),r23*(D*r31*(a/(b*b)+nu/(5*a)-1/(5*a))+D*r32*(-nu/(5*b)+1/(5*b)-b/(a*a))),D*r13*r23*(-4*a/(b*b*b)+4*nu/(5*a*b)-14/(5*a*b)+2*b/(a*a*a))+r21*(B*r12*(1/8-3*nu/8)+B*r11*((a*a)*(nu-1)+(b*b))/(6*a*b))+r22*(B*r11*(3*nu/8-1/8)+B*r12*(-4*(a*a)+(b*b)*(1-nu))/(12*a*b)),D*(r23*r23)*(-4*a/(b*b*b)+4*nu/(5*a*b)-14/(5*a*b)+2*b/(a*a*a))+r21*(B*r22*(1/8-3*nu/8)+B*r21*((a*a)*(nu-1)+(b*b))/(6*a*b))+r22*(B*r21*(3*nu/8-1/8)+B*r22*(-4*(a*a)+(b*b)*(1-nu))/(12*a*b)),D*r23*r33*(-4*a/(b*b*b)+4*nu/(5*a*b)-14/(5*a*b)+2*b/(a*a*a))+r21*(B*r32*(1/8-3*nu/8)+B*r31*((a*a)*(nu-1)+(b*b))/(6*a*b))+r22*(B*r31*(3*nu/8-1/8)+B*r32*(-4*(a*a)+(b*b)*(1-nu))/(12*a*b)),r23*(D*r11*(2*a/(b*b)-nu/(5*a)+1/(5*a))+D*r12*(4*nu/(5*b)+1/(5*b)-b/(a*a))),r23*(D*r21*(2*a/(b*b)-nu/(5*a)+1/(5*a))+D*r22*(4*nu/(5*b)+1/(5*b)-b/(a*a))),r23*(D*r31*(2*a/(b*b)-nu/(5*a)+1/(5*a))+D*r32*(4*nu/(5*b)+1/(5*b)-b/(a*a))),
             D*r13*r33*(4*a/(b*b*b)-4*nu/(5*a*b)+14/(5*a*b)+4*b/(a*a*a))+r31*(B*r12*(nu/8+1/8)+B*r11*((a*a)*(1-nu)+2*(b*b))/(6*a*b))+r32*(B*r11*(nu/8+1/8)+B*r12*(2*(a*a)+(b*b)*(1-nu))/(6*a*b)),D*r23*r33*(4*a/(b*b*b)-4*nu/(5*a*b)+14/(5*a*b)+4*b/(a*a*a))+r31*(B*r22*(nu/8+1/8)+B*r21*((a*a)*(1-nu)+2*(b*b))/(6*a*b))+r32*(B*r21*(nu/8+1/8)+B*r22*(2*(a*a)+(b*b)*(1-nu))/(6*a*b)),D*(r33*r33)*(4*a/(b*b*b)-4*nu/(5*a*b)+14/(5*a*b)+4*b/(a*a*a))+r31*(B*r32*(nu/8+1/8)+B*r31*((a*a)*(1-nu)+2*(b*b))/(6*a*b))+r32*(B*r31*(nu/8+1/8)+B*r32*(2*(a*a)+(b*b)*(1-nu))/(6*a*b)),r33*(D*r11*(2*a/(b*b)+4*nu/(5*a)+1/(5*a))+D*r12*(-4*nu/(5*b)-1/(5*b)-2*b/(a*a))),r33*(D*r21*(2*a/(b*b)+4*nu/(5*a)+1/(5*a))+D*r22*(-4*nu/(5*b)-1/(5*b)-2*b/(a*a))),r33*(D*r31*(2*a/(b*b)+4*nu/(5*a)+1/(5*a))+D*r32*(-4*nu/(5*b)-1/(5*b)-2*b/(a*a))),D*r13*r33*(2*a/(b*b*b)+4*nu/(5*a*b)-14/(5*a*b)-4*b/(a*a*a))+r31*(B*r12*(3*nu/8-1/8)+B*r11*((a*a)*(1-nu)-4*(b*b))/(12*a*b))+r32*(B*r11*(1/8-3*nu/8)+B*r12*((a*a)+(b*b)*(nu-1))/(6*a*b)),D*r23*r33*(2*a/(b*b*b)+4*nu/(5*a*b)-14/(5*a*b)-4*b/(a*a*a))+r31*(B*r22*(3*nu/8-1/8)+B*r21*((a*a)*(1-nu)-4*(b*b))/(12*a*b))+r32*(B*r21*(1/8-3*nu/8)+B*r22*((a*a)+(b*b)*(nu-1))/(6*a*b)),D*(r33*r33)*(2*a/(b*b*b)+4*nu/(5*a*b)-14/(5*a*b)-4*b/(a*a*a))+r31*(B*r32*(3*nu/8-1/8)+B*r31*((a*a)*(1-nu)-4*(b*b))/(12*a*b))+r32*(B*r31*(1/8-3*nu/8)+B*r32*((a*a)+(b*b)*(nu-1))/(6*a*b)),r33*(D*r11*(a/(b*b)-4*nu/(5*a)-1/(5*a))+D*r12*(nu/(5*b)-1/(5*b)-2*b/(a*a))),r33*(D*r21*(a/(b*b)-4*nu/(5*a)-1/(5*a))+D*r22*(nu/(5*b)-1/(5*b)-2*b/(a*a))),r33*(D*r31*(a/(b*b)-4*nu/(5*a)-1/(5*a))+D*r32*(nu/(5*b)-1/(5*b)-2*b/(a*a))),D*r13*r33*(-2*a/(b*b*b)-4*nu/(5*a*b)+14/(5*a*b)-2*b/(a*a*a))+r31*(B*r12*(-nu/8-1/8)+B*r11*((a*a)*(nu-1)-2*(b*b))/(12*a*b))+r32*(B*r11*(-nu/8-1/8)+B*r12*(-2*(a*a)+(b*b)*(nu-1))/(12*a*b)),D*r23*r33*(-2*a/(b*b*b)-4*nu/(5*a*b)+14/(5*a*b)-2*b/(a*a*a))+r31*(B*r22*(-nu/8-1/8)+B*r21*((a*a)*(nu-1)-2*(b*b))/(12*a*b))+r32*(B*r21*(-nu/8-1/8)+B*r22*(-2*(a*a)+(b*b)*(nu-1))/(12*a*b)),D*(r33*r33)*(-2*a/(b*b*b)-4*nu/(5*a*b)+14/(5*a*b)-2*b/(a*a*a))+r31*(B*r32*(-nu/8-1/8)+B*r31*((a*a)*(nu-1)-2*(b*b))/(12*a*b))+r32*(B*r31*(-nu/8-1/8)+B*r32*(-2*(a*a)+(b*b)*(nu-1))/(12*a*b)),r33*(D*r11*(a/(b*b)+nu/(5*a)-1/(5*a))+D*r12*(-nu/(5*b)+1/(5*b)-b/(a*a))),r33*(D*r21*(a/(b*b)+nu/(5*a)-1/(5*a))+D*r22*(-nu/(5*b)+1/(5*b)-b/(a*a))),r33*(D*r31*(a/(b*b)+nu/(5*a)-1/(5*a))+D*r32*(-nu/(5*b)+1/(5*b)-b/(a*a))),D*r13*r33*(-4*a/(b*b*b)+4*nu/(5*a*b)-14/(5*a*b)+2*b/(a*a*a))+r31*(B*r12*(1/8-3*nu/8)+B*r11*((a*a)*(nu-1)+(b*b))/(6*a*b))+r32*(B*r11*(3*nu/8-1/8)+B*r12*(-4*(a*a)+(b*b)*(1-nu))/(12*a*b)),D*r23*r33*(-4*a/(b*b*b)+4*nu/(5*a*b)-14/(5*a*b)+2*b/(a*a*a))+r31*(B*r22*(1/8-3*nu/8)+B*r21*((a*a)*(nu-1)+(b*b))/(6*a*b))+r32*(B*r21*(3*nu/8-1/8)+B*r22*(-4*(a*a)+(b*b)*(1-nu))/(12*a*b)),D*(r33*r33)*(-4*a/(b*b*b)+4*nu/(5*a*b)-14/(5*a*b)+2*b/(a*a*a))+r31*(B*r32*(1/8-3*nu/8)+B*r31*((a*a)*(nu-1)+(b*b))/(6*a*b))+r32*(B*r31*(3*nu/8-1/8)+B*r32*(-4*(a*a)+(b*b)*(1-nu))/(12*a*b)),r33*(D*r11*(2*a/(b*b)-nu/(5*a)+1/(5*a))+D*r12*(4*nu/(5*b)+1/(5*b)-b/(a*a))),r33*(D*r21*(2*a/(b*b)-nu/(5*a)+1/(5*a))+D*r22*(4*nu/(5*b)+1/(5*b)-b/(a*a))),r33*(D*r31*(2*a/(b*b)-nu/(5*a)+1/(5*a))+D*r32*(4*nu/(5*b)+1/(5*b)-b/(a*a))),
@@ -193,16 +184,7 @@ void global_stiffness_elem(vector<T> &lst, face element, double E, double nu, do
             D*r13*r21*(2*a/(b*b)-nu/(5*a)+1/(5*a))+D*r13*r22*(4*nu/(5*b)+1/(5*b)-b/(a*a)),D*r21*r23*(2*a/(b*b)-nu/(5*a)+1/(5*a))+D*r22*r23*(4*nu/(5*b)+1/(5*b)-b/(a*a)),D*r21*r33*(2*a/(b*b)-nu/(5*a)+1/(5*a))+D*r22*r33*(4*nu/(5*b)+1/(5*b)-b/(a*a)),D*r11*r21*(10*(a*a)+(b*b)*nu-(b*b))/(15*a*b)+D*r12*r22*(4*(a*a)*(nu-1)+10*(b*b))/(15*a*b),D*(r21*r21)*(10*(a*a)+(b*b)*nu-(b*b))/(15*a*b)+D*(r22*r22)*(4*(a*a)*(nu-1)+10*(b*b))/(15*a*b),D*r21*r31*(10*(a*a)+(b*b)*nu-(b*b))/(15*a*b)+D*r22*r32*(4*(a*a)*(nu-1)+10*(b*b))/(15*a*b),D*r13*r21*(a/(b*b)+nu/(5*a)-1/(5*a))+D*r13*r22*(nu/(5*b)-1/(5*b)+b/(a*a)),D*r21*r23*(a/(b*b)+nu/(5*a)-1/(5*a))+D*r22*r23*(nu/(5*b)-1/(5*b)+b/(a*a)),D*r21*r33*(a/(b*b)+nu/(5*a)-1/(5*a))+D*r22*r33*(nu/(5*b)-1/(5*b)+b/(a*a)),D*r11*r21*(5*(a*a)+(b*b)*(1-nu))/(15*a*b)+D*r12*r22*((a*a)*(1-nu)+5*(b*b))/(15*a*b),D*(r21*r21)*(5*(a*a)+(b*b)*(1-nu))/(15*a*b)+D*(r22*r22)*((a*a)*(1-nu)+5*(b*b))/(15*a*b),D*r21*r31*(5*(a*a)+(b*b)*(1-nu))/(15*a*b)+D*r22*r32*((a*a)*(1-nu)+5*(b*b))/(15*a*b),D*r13*r21*(-a/(b*b)+4*nu/(5*a)+1/(5*a))+D*r13*r22*(-nu/(5*b)+1/(5*b)+2*b/(a*a)),D*r21*r23*(-a/(b*b)+4*nu/(5*a)+1/(5*a))+D*r22*r23*(-nu/(5*b)+1/(5*b)+2*b/(a*a)),D*r21*r33*(-a/(b*b)+4*nu/(5*a)+1/(5*a))+D*r22*r33*(-nu/(5*b)+1/(5*b)+2*b/(a*a)),D*r11*r21*(10*(a*a)+4*(b*b)*nu-4*(b*b))/(15*a*b)+D*r12*r22*((a*a)*(nu-1)+10*(b*b))/(15*a*b),D*(r21*r21)*(10*(a*a)+4*(b*b)*nu-4*(b*b))/(15*a*b)+D*(r22*r22)*((a*a)*(nu-1)+10*(b*b))/(15*a*b),D*r21*r31*(10*(a*a)+4*(b*b)*nu-4*(b*b))/(15*a*b)+D*r22*r32*((a*a)*(nu-1)+10*(b*b))/(15*a*b),D*r13*r21*(-2*a/(b*b)-4*nu/(5*a)-1/(5*a))+D*r13*r22*(-4*nu/(5*b)-1/(5*b)-2*b/(a*a)),D*r21*r23*(-2*a/(b*b)-4*nu/(5*a)-1/(5*a))+D*r22*r23*(-4*nu/(5*b)-1/(5*b)-2*b/(a*a)),D*r21*r33*(-2*a/(b*b)-4*nu/(5*a)-1/(5*a))+D*r22*r33*(-4*nu/(5*b)-1/(5*b)-2*b/(a*a)),ktz4*r13*r23+r21*(D*nu*r12+D*r11*(20*(a*a)-4*(b*b)*nu+4*(b*b))/(15*a*b))+r22*(D*nu*r11+D*r12*(4*(a*a)*(1-nu)+20*(b*b))/(15*a*b)),ktz4*(r23*r23)+r21*(D*nu*r22+D*r21*(20*(a*a)-4*(b*b)*nu+4*(b*b))/(15*a*b))+r22*(D*nu*r21+D*r22*(4*(a*a)*(1-nu)+20*(b*b))/(15*a*b)),ktz4*r23*r33+r21*(D*nu*r32+D*r31*(20*(a*a)-4*(b*b)*nu+4*(b*b))/(15*a*b))+r22*(D*nu*r31+D*r32*(4*(a*a)*(1-nu)+20*(b*b))/(15*a*b)),
             D*r13*r31*(2*a/(b*b)-nu/(5*a)+1/(5*a))+D*r13*r32*(4*nu/(5*b)+1/(5*b)-b/(a*a)),D*r23*r31*(2*a/(b*b)-nu/(5*a)+1/(5*a))+D*r23*r32*(4*nu/(5*b)+1/(5*b)-b/(a*a)),D*r31*r33*(2*a/(b*b)-nu/(5*a)+1/(5*a))+D*r32*r33*(4*nu/(5*b)+1/(5*b)-b/(a*a)),D*r11*r31*(10*(a*a)+(b*b)*nu-(b*b))/(15*a*b)+D*r12*r32*(4*(a*a)*(nu-1)+10*(b*b))/(15*a*b),D*r21*r31*(10*(a*a)+(b*b)*nu-(b*b))/(15*a*b)+D*r22*r32*(4*(a*a)*(nu-1)+10*(b*b))/(15*a*b),D*(r31*r31)*(10*(a*a)+(b*b)*nu-(b*b))/(15*a*b)+D*(r32*r32)*(4*(a*a)*(nu-1)+10*(b*b))/(15*a*b),D*r13*r31*(a/(b*b)+nu/(5*a)-1/(5*a))+D*r13*r32*(nu/(5*b)-1/(5*b)+b/(a*a)),D*r23*r31*(a/(b*b)+nu/(5*a)-1/(5*a))+D*r23*r32*(nu/(5*b)-1/(5*b)+b/(a*a)),D*r31*r33*(a/(b*b)+nu/(5*a)-1/(5*a))+D*r32*r33*(nu/(5*b)-1/(5*b)+b/(a*a)),D*r11*r31*(5*(a*a)+(b*b)*(1-nu))/(15*a*b)+D*r12*r32*((a*a)*(1-nu)+5*(b*b))/(15*a*b),D*r21*r31*(5*(a*a)+(b*b)*(1-nu))/(15*a*b)+D*r22*r32*((a*a)*(1-nu)+5*(b*b))/(15*a*b),D*(r31*r31)*(5*(a*a)+(b*b)*(1-nu))/(15*a*b)+D*(r32*r32)*((a*a)*(1-nu)+5*(b*b))/(15*a*b),D*r13*r31*(-a/(b*b)+4*nu/(5*a)+1/(5*a))+D*r13*r32*(-nu/(5*b)+1/(5*b)+2*b/(a*a)),D*r23*r31*(-a/(b*b)+4*nu/(5*a)+1/(5*a))+D*r23*r32*(-nu/(5*b)+1/(5*b)+2*b/(a*a)),D*r31*r33*(-a/(b*b)+4*nu/(5*a)+1/(5*a))+D*r32*r33*(-nu/(5*b)+1/(5*b)+2*b/(a*a)),D*r11*r31*(10*(a*a)+4*(b*b)*nu-4*(b*b))/(15*a*b)+D*r12*r32*((a*a)*(nu-1)+10*(b*b))/(15*a*b),D*r21*r31*(10*(a*a)+4*(b*b)*nu-4*(b*b))/(15*a*b)+D*r22*r32*((a*a)*(nu-1)+10*(b*b))/(15*a*b),D*(r31*r31)*(10*(a*a)+4*(b*b)*nu-4*(b*b))/(15*a*b)+D*(r32*r32)*((a*a)*(nu-1)+10*(b*b))/(15*a*b),D*r13*r31*(-2*a/(b*b)-4*nu/(5*a)-1/(5*a))+D*r13*r32*(-4*nu/(5*b)-1/(5*b)-2*b/(a*a)),D*r23*r31*(-2*a/(b*b)-4*nu/(5*a)-1/(5*a))+D*r23*r32*(-4*nu/(5*b)-1/(5*b)-2*b/(a*a)),D*r31*r33*(-2*a/(b*b)-4*nu/(5*a)-1/(5*a))+D*r32*r33*(-4*nu/(5*b)-1/(5*b)-2*b/(a*a)),ktz4*r13*r33+r31*(D*nu*r12+D*r11*(20*(a*a)-4*(b*b)*nu+4*(b*b))/(15*a*b))+r32*(D*nu*r11+D*r12*(4*(a*a)*(1-nu)+20*(b*b))/(15*a*b)),ktz4*r23*r33+r31*(D*nu*r22+D*r21*(20*(a*a)-4*(b*b)*nu+4*(b*b))/(15*a*b))+r32*(D*nu*r21+D*r22*(4*(a*a)*(1-nu)+20*(b*b))/(15*a*b)),ktz4*(r33*r33)+r31*(D*nu*r32+D*r31*(20*(a*a)-4*(b*b)*nu+4*(b*b))/(15*a*b))+r32*(D*nu*r31+D*r32*(4*(a*a)*(1-nu)+20*(b*b))/(15*a*b));
 
-    auto stop_mat = high_resolution_clock::now();
-    auto duration_mat = duration_cast<microseconds>(stop_mat - start_mat);
-    tpsRemplissage_K += duration_mat.count();
 
-    
-    auto start_mult = high_resolution_clock::now();
-
-    auto stop_mult = high_resolution_clock::now();
-    auto duration_mult = duration_cast<microseconds>(stop_mult - start_mult);
-    tpsMultiplication += duration_mult.count();
     
     for (int i=0; i<24; i++){
         for (int j=0; j<=i; j++){
@@ -233,7 +215,7 @@ void global_stiffness_elem(vector<T> &lst, face element, double E, double nu, do
     };
 };
 
-// Cette fonction prend en entrée les quatre points d'un élément et la force surfacique normale exercée sur celui-ci
+// Cette fonction prend en entrée un élément et la force surfacique normale exercée sur celui-ci
 // Elle complète la liste de triplets pour le vecteur-force.
 void global_load_elem(vector<T> &lst, face element, double gz){
     double a = element.a;
@@ -251,11 +233,7 @@ void global_load_elem(vector<T> &lst, face element, double gz){
             z3, z3, z3, z3, z3, z3, m3_1, z3,
             z3, z3, z3, z3, z3, z3, z3, m3_1;
     VectorXd F_glo(24);
-    auto start_mult = high_resolution_clock::now();
     F_glo = m24_1*F_loc;
-    auto stop_mult = high_resolution_clock::now();
-    auto duration_mult = duration_cast<microseconds>(stop_mult - start_mult);
-    tpsMultiplication += duration_mult.count();
     
     for (int i=0; i<24; i++){
         double fi = F_glo(i);
@@ -348,12 +326,18 @@ VectorXd renvoie_mXY(double x, double y, double a, double b, double nu){
 // -----------------------------------------------
 
 void batardeau(double lh, double lv, double zInf, double zSup, vector<point> lst_coins, int nb_coins, double E, double nu, double t){
+
+    auto heure_0 = high_resolution_clock::now();
+
     vector<T> triplet_K;
     vector<T> triplet_F;
     vector<point> vertices;
     vector<face> elements; 
 
     carac_mail kar = mailleur(lh, lv, zInf, zSup, vertices, elements, lst_coins, nb_coins);
+
+    auto heure_1 = high_resolution_clock::now();
+
     int Nv=kar.Nv; int SNi=kar.SNi;
     int nb_total = SNi*(Nv+1);
     int nb_elmt = SNi*Nv;
@@ -362,36 +346,39 @@ void batardeau(double lh, double lv, double zInf, double zSup, vector<point> lst
     triplet_K.reserve(36*4*nb_total+6*SNi);
     triplet_F.reserve(6*4*nb_total);
 
-    auto start = high_resolution_clock::now();
+    auto heure_2 = high_resolution_clock::now();
 
     for (int k=0; k<nb_elmt; k++){
         global_stiffness_elem(triplet_K,elements[k],E,nu,t);
         global_load_elem(triplet_F,elements[k],10e3*(zSup-0.5*(elements[k].pt1.z+elements[k].pt4.z)));
     };
 
-    auto stop = high_resolution_clock::now();
-    auto duration = duration_cast<microseconds>(stop - start);
-    cout << "Durée remplissage [s] : " << duration.count()/1000000.0 << endl;
+    auto heure_3 = high_resolution_clock::now();
 
     double maxK = 1e20;
     for (int k=0; k<6*SNi; k++){
         triplet_K.push_back(T(k,k,maxK));
     };
 
+    auto heure_4 = high_resolution_clock::now();
+
     SparseMatrix<double> mat_K(6*nb_total,6*nb_total);
     mat_K.setFromTriplets(triplet_K.begin(),triplet_K.end());
+
+    auto heure_5 = high_resolution_clock::now();
 
     SparseMatrix<double> mat_F(6*nb_total,1);
     mat_F.setFromTriplets(triplet_F.begin(),triplet_F.end());
 
+    auto heure_6 = high_resolution_clock::now();
+
     SimplicialCholesky<SparseMatrix<double>> chol(mat_K);
+
+    auto heure_7 = high_resolution_clock::now();
+
     VectorXd q_sol = chol.solve(mat_F);
 
-    //ConjugateGradient<SparseMatrix<double>, Lower|Upper> solver;
-    //SimplicialLDLT<SparseMatrix<double>> solver;
-    //SimplicialLLT<SparseMatrix<double>> solver;
-    //solver.compute(mat_K);
-    //VectorXd q_sol = solver.solve(mat_F);
+    auto heure_8 = high_resolution_clock::now();
 
     ofstream MyFile("output_batardeau.csv");
 
@@ -403,6 +390,8 @@ void batardeau(double lh, double lv, double zInf, double zSup, vector<point> lst
     };
 
     MyFile.close();
+
+    auto heure_9 = high_resolution_clock::now();
 
     ofstream MyFile2("output_batardeau_eff.csv");
 
@@ -439,6 +428,21 @@ void batardeau(double lh, double lv, double zInf, double zSup, vector<point> lst
     };
 
     MyFile2.close();
+
+    auto heure_10 = high_resolution_clock::now();
+
+    cout << "Vect+mailleur: " << (duration_cast<microseconds>(heure_1 - heure_0)).count()/1e6 << "s" << endl;
+    cout << "Reserv+cout:   " << (duration_cast<microseconds>(heure_2 - heure_1)).count()/1e6 << "s" << endl;
+    cout << "Rempl. tripl.: " << (duration_cast<microseconds>(heure_3 - heure_2)).count()/1e6 << "s" << endl;
+    cout << "Ajout appuis:  " << (duration_cast<microseconds>(heure_4 - heure_3)).count()/1e6 << "s" << endl;
+    cout << "Sparse K:      " << (duration_cast<microseconds>(heure_5 - heure_4)).count()/1e6 << "s" << endl;
+    cout << "Sparse F:      " << (duration_cast<microseconds>(heure_6 - heure_5)).count()/1e6 << "s" << endl;
+    cout << "Système Chol.: " << (duration_cast<microseconds>(heure_7 - heure_6)).count()/1e6 << "s" << endl;
+    cout << "Résolut Chol.: " << (duration_cast<microseconds>(heure_8 - heure_7)).count()/1e6 << "s" << endl;
+    cout << "Écriture depl: " << (duration_cast<microseconds>(heure_9 - heure_8)).count()/1e6 << "s" << endl;
+    cout << "Écriture effo: " << (duration_cast<microseconds>(heure_10 - heure_9)).count()/1e6 << "s" << endl;
+    cout << "Total:         " << (duration_cast<microseconds>(heure_10 - heure_0)).count()/1e6 << "s" << endl;
+    
 };
 
 // VI - Fonction main, script du programme
@@ -446,7 +450,6 @@ void batardeau(double lh, double lv, double zInf, double zSup, vector<point> lst
 
 int main() {
 
-    auto start2 = high_resolution_clock::now();
     double lh, lv, zInf, zSup, E, nu, t;
     int nb_coins;
     string extract;
@@ -467,14 +470,6 @@ int main() {
     rFile.close();
 
     batardeau(lh,lv,zInf,zSup,lst_coins,nb_coins, E, nu, t);
-
-    cout << "Durée création K [s] : " << tpsRemplissage_K/1000000.0 << endl;
-    cout << "Durée création R [s] : " << tpsR3/1000000.0 << endl;
-    cout << "Durée multiplication [s] : " << tpsMultiplication/1000000.0 << endl;
-
-    auto stop2 = high_resolution_clock::now();
-    auto duration2 = duration_cast<microseconds>(stop2 - start2);
-    cout << "Durée totale [s] : " << duration2.count()/1000000.0 << endl;
 
     return 0;
 };
