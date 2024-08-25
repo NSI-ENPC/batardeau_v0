@@ -26,6 +26,7 @@
 //      v0.1 - Première implémentation du code pour coque seule, retranscription du code Python.
 //      v0.2 - Amélioration de l'étape d'assemblage, en internalisant la multiplication de rotation.
 //             On passe de 25% à 6-7% en part de temps pour l'assemblage. 
+//      v0.3 - Système correct d'affichage du temps. Correction des cotes.
 
 
 
@@ -151,7 +152,7 @@ void global_stiffness_elem(vector<T> &lst, face element, double E, double nu, do
     double D = E*t*t*t/(12*(1-nu*nu));
     double a = element.a;
     double b = element.b;
-    int ktz1=element.pt1.ktz;int ktz2=element.pt2.ktz;int ktz3=element.pt3.ktz;int ktz4=element.pt4.ktz;
+    int ktz1=element.pt1.ktz*D;int ktz2=element.pt2.ktz*D;int ktz3=element.pt3.ktz*D;int ktz4=element.pt4.ktz*D;
 
     m3_1 = element.local2global();
     double r11=m3_1(0,0);double r12=m3_1(0,1);double r13=m3_1(0,2);
@@ -364,6 +365,7 @@ void batardeau(double lh, double lv, double zInf, double zSup, vector<point> lst
 
     SparseMatrix<double> mat_K(6*nb_total,6*nb_total);
     mat_K.setFromTriplets(triplet_K.begin(),triplet_K.end());
+    //cout << mat_K.nonZeros() <<endl;
 
     auto heure_5 = high_resolution_clock::now();
 
@@ -372,11 +374,16 @@ void batardeau(double lh, double lv, double zInf, double zSup, vector<point> lst
 
     auto heure_6 = high_resolution_clock::now();
 
-    SimplicialCholesky<SparseMatrix<double>> chol(mat_K);
+    SimplicialLDLT<SparseMatrix<double>, Lower|Upper> chol(mat_K);
+    //ConjugateGradient<SparseMatrix<double>, Lower|Upper> chol(mat_K);
 
     auto heure_7 = high_resolution_clock::now();
 
+    //chol.setTolerance(1.0e-2);
+
     VectorXd q_sol = chol.solve(mat_F);
+    //cout << chol.iterations() << endl;
+    //cout << chol.error() << endl;
 
     auto heure_8 = high_resolution_clock::now();
 
@@ -449,6 +456,9 @@ void batardeau(double lh, double lv, double zInf, double zSup, vector<point> lst
 // ---------------------------------------
 
 int main() {
+
+    //initParallel();
+    //setNbThreads(2);
 
     double lh, lv, zInf, zSup, E, nu, t;
     int nb_coins;
