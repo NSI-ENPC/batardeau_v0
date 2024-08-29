@@ -171,13 +171,29 @@ def add_row(n_clicks, rows, columns):
 def aff_struct(zSup,zInf,tabPt):
     fig = go.Figure()
 
-    print()
+    '''
+
+    light_yellow = [[0, '#FFDB58'], [1, '#FFDB58']]
 
     try:
-        '''        
-
-        #fig.add_trace(go.Surface(x=[0,1],y=[0,1],z=[[0,0],[0,0]]))
-        '''
+        
+        n = len(tabPt)
+        kompteur = 0
+        print(tabPt)
+        while (kompteur<=n-1):
+            k_next = kompteur+1 if kompteur<n-1 else 0
+            
+            fig.add_trace(go.Surface(x=np.array([[tabPt[kompteur]['x'],tabPt[k_next]['x']],[tabPt[kompteur]['x'],tabPt[k_next]['x']]]),
+                                     y=np.array([[tabPt[kompteur]['y'],tabPt[k_next]['y']],[tabPt[kompteur]['y'],tabPt[k_next]['y']]]),
+                                     z=np.array([[zInf,zInf],[zSup,zSup]]),
+                                     showscale=False,
+                                     colorscale=light_yellow))
+            kompteur += 1
+    
+    except:
+        print("Problème")
+    '''
+    try:
         n = len(tabPt)
         k = 0
         while (k<n):
@@ -198,9 +214,10 @@ def aff_struct(zSup,zInf,tabPt):
                                         k = [0, 7, 2, 3, 6, 7, 1, 1, 5, 5, 7, 6],
                                         color='lightpink',contour=dict(color='black',show=True,width=3)))
             k += 1
-        #'''
+    
     except:
         print("Problème")
+    #'''
 
     return fig
 
@@ -249,7 +266,8 @@ def calculate(n_click,zInf,zSup,lv,lh,E,nu,t,tabPt):
         except:
             "Rien"
         t0 = time.time()
-        a = os.system(os.getcwd()+r'/batardeau_engine')
+        #a = os.system(os.getcwd()+r'/batardeau_engine')
+        a = os.system(os.getcwd()+r'/Engine')
         temps = str(round(time.time()-t0,3))
         print('[s] '+temps)
     return "Calculer (dernier calcul: "+temps+" s)"
